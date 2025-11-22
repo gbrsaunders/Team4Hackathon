@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Societies Dashboard | Student Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="header">
+            <div class="logo">
+                <h3>Student Hub 🎓</h3>
+            </div>
+            <div class="user-actions">
+                <span>Welcome, Student!</span>
+                <a href="#profile">👤 Profile</a>
+                <a href="#">Logout</a>
+            </div>
+        </header>
+
+        <nav class="top-taskbar">
+            <ul>
+                <li class="active"><a href="#explore">📚 Explore Societies</a></li>
+                <li><a href="#my-societies">⭐ My Societies</a></li>
+                <li><a href="#events">🗓️ Events</a></li>
+                <li><a href="#profile">👤 Profile</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+
+            <div class="search-container">
+                <input type="text" placeholder="Search for societies (e.g., 'Chess', 'Drama', 'Tech')..." class="society-search-input">
+                <button type="submit" class="search-btn">🔍 Search</button>
+            </div>
+
+            <section class="metrics-summary">
+                <div class="metric-box" onclick="alert('Showing details for 5 Societies you joined.')">
+                    <h4>⭐ My Societies</h4>
+                    <p class="metric-number">5</p>
+                    <span>Click to view your groups</span>
+                </div>
+                <div class="metric-box" onclick="alert('Showing details for 12 Upcoming Events.')">
+                    <h4>🗓️ Upcoming Events</h4>
+                    <p class="metric-number">12</p>
+                    <span>Click to view event calendar</span>
+                </div>
+                <div class="metric-box" onclick="alert('Showing details for 45 Total Societies.')">
+                    <h4>📚 Total Societies</h4>
+                    <p class="metric-number">45</p>
+                    <span>Click to explore all groups</span>
+                </div>
+            </section>
+            
+            <hr>
+
+            <section id="explore" class="dashboard-section">
+                <h2>📚 Explore Societies</h2>
+                <div class="card-grid">
+                    <div class="card">
+                        <h3>Coding Club</h3>
+                        <p>Learn to code and build projects.</p>
+                        <button class="join-btn">Join</button>
+                    </div>
+                    <div class="card">
+                        <h3>Photography Society</h3>
+                        <p>Capture the moments on and off campus.</p>
+                        <button class="join-btn">Join</button>
+                    </div>
+                    <div class="card">
+                        <h3>Debate Team</h3>
+                        <p>Sharpen your arguments and public speaking.</p>
+                        <button class="join-btn">Join</button>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="my-societies" class="dashboard-section hidden-section">
+                <h2>⭐ My Societies</h2>
+                <ul class="society-list">
+                    <li>Marketing Mavens - **Upcoming: Workshop on SEO**</li>
+                    <li>Volunteering Crew - **Next Meeting: Thu, 5 PM**</li>
+                </ul>
+            </section>
+
+            <section id="events" class="dashboard-section hidden-section">
+                <h2>🗓️ Upcoming Events</h2>
+                <div class="event-card">
+                    <h4>Annual Gala Dinner</h4>
+                    <p>Societies Council | Fri, Dec 15th, 7:00 PM</p>
+                </div>
+                <div class="event-card">
+                    <h4>Beginner's Yoga Session</h4>
+                    <p>Wellness Society | Sun, Nov 26th, 10:00 AM</p>
+                </div>
+            </section>
+
+            <section id="profile" class="dashboard-section hidden-section">
+                <h2>👤 Profile Settings</h2>
+                <div class="profile-info">
+                    <p><strong>Name
