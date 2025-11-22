@@ -1,10 +1,16 @@
 
+let societyData = []
+// society-name student-category student-meeting student-description
 let userData = []
 // User Data - firstName, lastName, email
 let memberData = []
 // Membership Data - membership, membershipID
 let indexData = []
 // User - Membership - userIndex, MembershipIndex
+function saveSociety(){
+    
+}
+
 function addUser(){   
     const firstName =  document.getElementById("firstName").value 
     const lastName =  document.getElementById("lastName").value 
@@ -30,3 +36,14 @@ function addMembershipToUser(){
     const membershipID =  document.getElementById("membershipID").value
     memberData.push([membership, membershipID])
 }
+function addUsersToPage(){
+    const table = document.getElementById("members-table");
+    for (const row of tableArr) {
+        const tableRow = table.insertRow();
+        for (const cell of row) {
+            const newCell = tableRow.insertCell();
+            newCell.textContent = cell;
+        }
+    }
+}
+addUsersToPage()
