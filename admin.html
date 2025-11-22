@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>University Societies Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="layout">
+   
+    <aside class="sidebar">
+      <h1 class="logo">Societies Admin</h1>
+
+      <nav class="nav">
+        <button class="nav-link active" data-target="societies-section">
+          Societies
+        </button>
+        <button class="nav-link" data-target="members-section">
+          Members
+        </button>
+        <button class="nav-link" data-target="announcements-section">
+          Announcements
+        </button>
+      </nav>
+    </aside>
+
+    
+    <main class="main">
+      
+          <!-- Add / Edit Society Form -->
+          <div class="card">
+            <h3 id="society-form-title">Add New Society</h3>
+            <form id="society-form">
+              <input type="hidden" id="society-id" />
+
+              <label>
+                Society Name
+                <input type="text" id="society-name" placeholder="e.g. Computer Science Society" required />
+              </label>
+
+              <label>
+                Category
+                <input type="text" id="society-category" placeholder="e.g. Academic, Sports, Arts" />
+              </label>
+
+              <label>
+                Meeting Time
+                <input type="text" id="society-meeting" placeholder="e.g. Wednesdays 5–6 pm" />
+              </label>
+
+              <label>
+                Description
+                <textarea id="society-description" rows="3" placeholder="Short description of the society"></textarea>
+              </label>
+
+              <label>
+                Status
+                <select id="society-status">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </label>
+
+              <div class="form-actions">
+                <button type="submit" class="btn primary">Save Society</button>
+                <button type="button" class="btn" id="society-cancel-edit">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Societies List -->
+          <div class="card">
+            <h3>Existing Societies</h3>
+            <table class="table" id="societies-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Members</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                <tr data-id="1">
+                  <td>Computer Science Society</td>
+                  <td>Academic</td>
+                  <td><span class="tag tag-green">Active</span></td>
+                  <td>42</td>
+                  <td>
+                    <button class="btn small" data-action="edit-society">Edit</button>
+                    <button class="btn small danger" data-action="delete-society">Delete</button>
+                  </td>
+                </tr>
+                <tr data-id="2">
+                  <td>Drama Society</td>
+                  <td>Arts</td>
+                  <td><span class="tag tag-yellow">Inactive</span></td>
+                  <td>18</td>
+                  <td>
+                    <button class="btn small" data-action="edit-society">Edit</button>
+                    <button class="btn small danger" data-action="delete-society">Delete</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      
+      <section id="members-section" class="section">
+        <header class="section-header">
+          <h2>Society Members</h2>
+          <p>View and remove members from a chosen society.</p>
+        </header>
+
+        <div class="card">
+          <form class="inline-form">
+            <label>
+              Select Society
+              <select id="members-society-select">
+                <option value="1">Computer Science Society</option>
+                <option value="2">Drama Society</option>
+              </select>
+            </label>
+          </form>
+
+          <table class="table" id="members-table">
+            <thead>
+              <tr>
+                <th>Member Name</th>
+                <th>Student ID</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              <tr data-id="m1">
+                <td>Alex Johnson</td>
+                <td>u1234567</td>
+                <td>alex.johnson@example.com</td>
+                <td>President</td>
+                <td>
+                  <button class="btn small danger" data-action="remove-member">Remove</button>
+                </td>
+              </tr>
+              <tr data-id="m2">
+                <td>Priya Singh</td>
+                <td>u2345678</td>
+                <td>priya.singh@example.com</td>
+                <td>Member</td>
+                <td>
+                  <button class="btn small danger" data-action="remove-member">Remove</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      
+      <section id="announcements-section" class="section">
+        <header class="section-header">
+          <h2>Announcements</h2>
+          <p>Post announcements for individual societies.</p>
+        </header>
+
+        <div class="section-grid">
+          
+          <div class="card">
+            <h3>Create Announcement</h3>
+            <form id="announcement-form">
+              <label>
+                Society
+                <select id="announcement-society">
+                  <option value="1">Computer Science Society</option>
+                  <option value="2">Drama Society</option>
+                </select>
+              </label>
+
+              <label>
+                Title
+                <input type="text" id="announcement-title" placeholder="e.g. Welcome Meeting" required />
+              </label>
+
+              <label>
+                Message
+                <textarea id="announcement-message" rows="4" placeholder="Write your announcement here..." required></textarea>
+              </label>
+
+              <label>
+                Visible Until
+                <input type="date" id="announcement-until" />
+              </label>
+
+              <div class="form-actions">
+                <button type="submit" class="btn primary">Post Announcement</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Announcement List -->
+          <div class="card">
+            <h3>Recent Announcements</h3>
+            <ul class="announcement-list" id="announcement-list">
+              <li>
+                <div class="announcement-header">
+                  <span class="announcement-society">Computer Science Society</span>
+                  <span class="announcement-date">Posted: 20 Nov 2025</span>
+                </div>
+                <h4>Intro Meeting</h4>
+                <p>Our first meeting will be held on Monday in Lab 3. All welcome!</p>
+              </li>
+              <li>
+                <div class="announcement-header">
+                  <span class="announcement-society">Drama Society</span>
+                  <span class="announcement-date">Posted: 18 Nov 2025</span>
+                </div>
+                <h4>Auditions</h4>
+                <p>Auditions for the winter play will take place next week in the main hall.</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  
+  <script>
+    
+    const navLinks = document.querySelectorAll(".nav-link");
+    const sections = document.querySelectorAll(".section");
+
+    navLinks.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        navLinks.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const target = btn.dataset.target;
+        sections.forEach((section) => {
+          section.classList.toggle("visible", section.id === target);
+        });
+      });
+    });
+
+    
+    const societiesTable = document.getElementById("societies-table");
+    const societyForm = document.getElementById("society-form");
+    const formTitle = document.getElementById("society-form-title");
+    const cancelEditBtn = document.getElementById("society-cancel-edit");
+
+    societiesTable.addEventListener("click", (e) => {
+      const action = e.target.dataset.action;
+      const row = e.target.closest("tr");
+      if (!row || !action) return;
+
+      if (action === "edit-society") {
+        const cells = row.children;
+        document.getElementById("society-id").value = row.dataset.id;
+        document.getElementById("society-name").value = cells[0].textContent.trim();
+        document.getElementById("society-category").value = cells[1].textContent.trim();
+        document.getElementById("society-status").value =
+          cells[2].textContent.trim().toLowerCase() === "active" ? "active" : "inactive";
+        document.getElementById("society-meeting").value = "";
+        document.getElementById("society-description").value = "";
+        formTitle.textContent = "Edit Society";
+      }
+
+      if (action === "delete-society") {
+        if (confirm("Are you sure you want to delete this society?")) {
+          row.remove();
+        }
+      }
+    });
+
+    
+    cancelEditBtn.addEventListener("click", () => {
+      societyForm.reset();
+      document.getElementById("society-id").value = "";
+      formTitle.textContent = "Add New Society";
+    });
+
+    
+    societyForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      alert("This is where you'd send the society data to your backend.");
+      societyForm.reset();
+      document.getElementById("society-id").value = "";
+      formTitle.textContent = "Add New Society";
+    });
+
+    
+    const membersTable = document.getElementById("members-table");
+    membersTable.addEventListener("click", (e) => {
+      if (e.target.dataset.action === "remove-member") {
+        const row = e.target.closest("tr");
+        if (confirm("Remove this member from the society?")) {
+          row.remove();
+        }
+      }
+    });
+
+    
+    const announcementForm = document.getElementById("announcement-form");
+    const announcementList = document.getElementById("announcement-list");
+
+    announcementForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const societyName = announcementForm
+        .querySelector("#announcement-society")
+        .selectedOptions[0].textContent;
+      const title = announcementForm.querySelector("#announcement-title").value;
+      const message = announcementForm.querySelector("#announcement-message").value;
+
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div class="announcement-header">
+          <span class="announcement-society">${societyName}</span>
+          <span class="announcement-date">Posted: just now</span>
+        </div>
+        <h4>${title}</h4>
+        <p>${message}</p>
+      `;
+      announcementList.prepend(li);
+      announcementForm.reset();
+    });
+  </script>
+</body>
+</html>
