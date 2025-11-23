@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Societies Admin – Societies</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+  <div class="topbar-brand">Societies Admin</div>
+
+  <img src="lei-logo.png" alt="University of Leicester" class="topbar-logo" />
+
+  <nav class="topbar-nav">
+    <a class="topbar-link" href="societies.html">Societies</a>
+    <a class="topbar-link" href="members.html">Members</a>
+    <a class="topbar-link" href="events.html">Events</a>
+    <a class="topbar-link" href="announcements.html">Announcements</a>
+  </nav>
+</header>
+
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <h2 class="page-title">Societies Overview</h2>
+    <p class="page-subtitle">Manage and monitor societies.</p>
+
+    <div class="dashboard-cards">
+      <div class="stat-card">
+        <p class="stat-label">Total Societies</p>
+        <p class="stat-number" id="total-societies-count">0</p>
+      </div>
+
+      <div class="stat-card">
+        <p class="stat-label">Total Members</p>
+        <p class="stat-number" id="total-members-count">0</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="manage-header">
+        <div class="manage-header-left">
+          <h3 class="manage-title" id="society-form-title">Manage Societies</h3>
+        </div>
+        <button class="add-society-btn" id="add-society-btn">+ Add New Society</button>
+      </div>
+
+      <!-- ADD/EDIT FORM -->
+      <div class="panel" id="add-society-panel" style="display:none; margin-top:10px;">
+        <form id="society-form">
+          <label>
+            Society Name
+            <input type="text" id="society-name-input" required />
+          </label>
+
+          <label>
+            Description
+            <input type="text" id="society-description-input" />
+          </label>
+
+          <label>
+            Status
+            <select id="society-status-input">
+              <option value="active">Active</option>
+              <option value="archived">Archived</option>
+            </select>
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Society</button>
+            <button type="button" class="btn btn-soft" id="society-cancel-btn">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- FILTERS -->
+      <div class="filter-bar">
+        <input type="text" placeholder="Search by name…" id="society-search" />
+        <select id="society-status-filter">
+          <option value="">Status: All</option>
+          <option value="active">Active</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+
+      <!-- SOCIETY CARDS -->
+      <div class="society-grid" id="society-grid"></div>
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+
+  <script>
+    let societyData = loadSocietyData();
+    let editingName = null;
+
+    const totalSocietiesEl = document.getElementById("total-societies-count");
+    const totalMembersEl = document.getElementById("total-members-count");
+    const societyGrid = document.getElementById("society-grid");
+    const searchInput = document.getElementById("society-search");
+    const statusFilter = document.getElementById("society-status-filter");
+
+    const addBtn = document.getElementById("add-society-btn");
+    const formPanel = document.getElementById("add-society-panel");
+    const form = document.getElementById("society-form");
+    const cancelBtn = document.getElementById("society-cancel-btn");
+    const formTitle = document.getElementById("society-form-title");
+    const nameInput = document.getElementById("society-name-input");
+    const descInput = document.getElementById("society-description-input");
+    const statusInput = document.getElementById("society-status-input");
+
+    function updateStats() {
+      const names = Object.keys(societyData);
+      totalSocietiesEl.textContent = names.length;
+
+      let totalMembers = 0;
+      names.forEach(name => {
+        totalMembers += (societyData[name].members || []).length;
+      });
+
+      totalMembersEl.textContent = totalMembers;
+    }
+
+    function renderSocieties() {
+      societyGrid.innerHTML = "";
+      const search = searchInput.value.toLowerCase();
+      const filterStatus = statusFilter.value;
+
+      Object.entries(societyData).forEach(([name, info]) => {
+        if (search && !name.toLowerCase().includes(search)) return;
+        if (filterStatus && info.status !== filterStatus) return;
+
+        const memberCount = (info.members || []).length;
+        const statusClass = info.status === "active" ? "tag tag-active" : "tag";
+        const statusText = info.status === "active" ? "Active" : "Archived";
+        const archiveLabel = info.status === "active" ? "Archive" : "Restore";
+
+        const card = document.createElement("article");
+        card.className = "society-card";
+        card.innerHTML = `
+          <div>
+            <h3>${name}</h3>
+            <p>${info.description || "No description provided."}</p>
+          </div>
+          <div class="society-meta">
+            <span>${memberCount} members</span>
+            <span class="${statusClass}">${statusText}</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-primary edit-society" data-name="${name}">Edit</button>
+            <button class="btn btn-outline view-members" data-name="${name}">View Members</button>
+            <button class="btn btn-soft toggle-status" data-name="${name}">${archiveLabel}</button>
+          </div>
+        `;
+        societyGrid.appendChild(card);
+      });
+
+      updateStats();
+    }
+
+    function openAddForm() {
+      editingName = null;
+      formTitle.textContent = "Add New Society";
+      form.reset();
+      nameInput.disabled = false;
+      formPanel.style.display = "block";
+    }
+
+    function openEditForm(name) {
+      const info = societyData[name];
+      if (!info) return;
+
+      editingName = name;
+      formTitle.textContent = "Edit Society";
+      nameInput.value = name;
+      nameInput.disabled = false;
+      descInput.value = info.description || "";
+      statusInput.value = info.status;
+
+      formPanel.style.display = "block";
+    }
+
+    function closeForm() {
+      formPanel.style.display = "none";
+      form.reset();
+      editingName = null;
+      formTitle.textContent = "Manage Societies";
+      nameInput.disabled = false;
+    }
+
+    addBtn.addEventListener("click", openAddForm);
+    cancelBtn.addEventListener("click", closeForm);
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const newName = nameInput.value.trim();
+      const desc = descInput.value.trim();
+      const status = statusInput.value;
+
+      if (!newName) return;
+
+      if (editingName === null) {
+        if (societyData[newName]) {
+          alert("A society with that name already exists.");
+          return;
+        }
+        societyData[newName] = { description: desc, status, members: [] };
+      } else {
+        if (newName !== editingName && societyData[newName]) {
+          alert("A society with that name already exists.");
+          return;
+        }
+        const old = societyData[editingName];
+        const updated = { description: desc, status, members: old.members || [] };
+
+        if (newName !== editingName) delete societyData[editingName];
+        societyData[newName] = updated;
+      }
+
+      saveSocietyData(societyData);
+      closeForm();
+      renderSocieties();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (e.target.classList.contains("view-members")) {
+        const name = e.target.dataset.name;
+        window.location.href = `members.html?society=${encodeURIComponent(name)}`;
+      }
+
+      if (e.target.classList.contains("toggle-status")) {
+        const name = e.target.dataset.name;
+        societyData[name].status =
+          societyData[name].status === "active" ? "archived" : "active";
+        saveSocietyData(societyData);
+        renderSocieties();
+      }
+
+      if (e.target.classList.contains("edit-society")) {
+        openEditForm(e.target.dataset.name);
+      }
+    });
+
+    searchInput.addEventListener("input", renderSocieties);
+    statusFilter.addEventListener("change", renderSocieties);
+
+    function refreshAndRender() {
+      societyData = loadSocietyData();
+      renderSocieties();
+    }
+
+    refreshAndRender();
+    window.addEventListener("pageshow", refreshAndRender);
+  </script>
+
+</body>
+</html>

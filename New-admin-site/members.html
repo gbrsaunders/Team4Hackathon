@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Societies Admin – Members</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <header class="topbar">
+  <div class="topbar-brand">Societies Admin</div>
+
+  <img src="lei-logo.png" alt="University of Leicester" class="topbar-logo" />
+
+  <nav class="topbar-nav">
+    <a class="topbar-link" href="societies.html">Societies</a>
+    <a class="topbar-link" href="members.html">Members</a>
+    <a class="topbar-link" href="events.html">Events</a>
+    <a class="topbar-link" href="announcements.html">Announcements</a>
+  </nav>
+</header>
+
+
+  <main class="main">
+    <h2 class="page-title" id="members-page-title">Members</h2>
+    <p class="page-subtitle" id="members-page-subtitle">
+      View and manage members for each society.
+    </p>
+
+    <div class="panel">
+      <label>
+        Select Society
+        <select id="members-society-select"></select>
+      </label>
+
+      <table id="members-table">
+        <thead>
+          <tr>
+            <th>Member Name</th>
+            <th>Student ID</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="members-table-body"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h3>Add Member</h3>
+      <form id="add-member-form">
+        <label>
+          Name
+          <input type="text" id="member-name" required />
+        </label>
+        <label>
+          Student ID
+          <input type="text" id="member-id" required />
+        </label>
+        <label>
+          Email
+          <input type="email" id="member-email" required />
+        </label>
+        <label>
+          Role
+          <input type="text" id="member-role" value="Member" />
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Add Member</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script>
+    let societyData = loadSocietyData();
+    let currentSociety = null;
+
+    const selectEl = document.getElementById("members-society-select");
+    const tableBody = document.getElementById("members-table-body");
+    const titleEl = document.getElementById("members-page-title");
+    const subtitleEl = document.getElementById("members-page-subtitle");
+    const addMemberForm = document.getElementById("add-member-form");
+
+    function getSocietyFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("society");
+    }
+
+    function setSocietyInUrl(name) {
+      const params = new URLSearchParams(window.location.search);
+      params.set("society", name);
+      const newUrl = window.location.pathname + "?" + params.toString();
+      window.history.replaceState({}, "", newUrl);
+    }
+
+    function populateSocietySelect() {
+      selectEl.innerHTML = "";
+      Object.keys(societyData).forEach((name) => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        selectEl.appendChild(opt);
+      });
+    }
+
+    function renderMembers() {
+      societyData = loadSocietyData();
+      if (!currentSociety || !societyData[currentSociety]) return;
+
+      const info = societyData[currentSociety];
+      const members = info.members || [];
+      tableBody.innerHTML = "";
+
+      members.forEach((m, index) => {
+        const tr = document.createElement("tr");
+        tr.dataset.index = index;
+        tr.innerHTML = `
+          <td>${m.name}</td>
+          <td>${m.id}</td>
+          <td>${m.email}</td>
+          <td>${m.role}</td>
+          <td>
+            <button class="btn btn-small btn-danger" data-action="remove-member">Remove</button>
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      titleEl.textContent = `${currentSociety} – Members`;
+      subtitleEl.textContent =
+        info.description || "View and manage members for this society.";
+    }
+
+    function initMembersPage() {
+      societyData = loadSocietyData();
+      const names = Object.keys(societyData);
+      if (!names.length) return;
+
+      populateSocietySelect();
+
+      const fromUrl = getSocietyFromUrl();
+      if (fromUrl && societyData[fromUrl]) {
+        currentSociety = fromUrl;
+      } else {
+        currentSociety = names[0];
+      }
+
+      selectEl.value = currentSociety;
+      renderMembers();
+    }
+
+    selectEl.addEventListener("change", () => {
+      const value = selectEl.value;
+      if (!value) return;
+      currentSociety = value;
+      setSocietyInUrl(value);
+      renderMembers();
+    });
+
+    addMemberForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      societyData = loadSocietyData();
+      if (!currentSociety || !societyData[currentSociety]) return;
+
+      const name = document.getElementById("member-name").value.trim();
+      const id = document.getElementById("member-id").value.trim();
+      const email = document.getElementById("member-email").value.trim();
+      const role = document.getElementById("member-role").value.trim() || "Member";
+
+      if (!name || !id || !email) return;
+
+      const society = societyData[currentSociety];
+      if (!society.members) society.members = [];
+      society.members.push({ name, id, email, role });
+
+      saveSocietyData(societyData);
+      addMemberForm.reset();
+      renderMembers();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (e.target.dataset.action === "remove-member") {
+        const row = e.target.closest("tr");
+        if (!row || !currentSociety) return;
+        const index = parseInt(row.dataset.index, 10);
+        if (isNaN(index)) return;
+
+        societyData = loadSocietyData();
+        if (!societyData[currentSociety]) return;
+
+        if (confirm("Remove this member from the society?")) {
+          societyData[currentSociety].members.splice(index, 1);
+          saveSocietyData(societyData);
+          renderMembers();
+        }
+      }
+    });
+
+    initMembersPage();
+  </script>
+</body>
+</html>
