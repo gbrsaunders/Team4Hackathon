@@ -3,29 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Societies Dashboard | Student Hub</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Societies Dashboard | University of Leicester Student Hub</title>
+    <link rel="stylesheet" href="styles.css"> 
 </head>
 <body>
     <div class="dashboard-container">
         <header class="header">
             <div class="logo">
-                <h3>Student Hub 🎓</h3>
+                <h3>Student Hub🎓</h3>
             </div>
             <div class="user-actions">
                 <span>Welcome, Student!</span>
-                <a href="#profile">👤 Profile</a>
-                <a href="#">Logout</a>
+                <a href="#profile" class="header-link">👤 Profile</a>
+                <a href="#" class="header-link logout-link">Logout</a>
             </div>
         </header>
 
         <nav class="top-taskbar">
             <ul>
-                <li class="active"><a href="#explore">📚 Explore Societies</a></li>
-                <li><a href="#my-societies">⭐ My Societies</a></li>
-                <li><a href="#events">🗓️ Events</a></li>
-                <li><a href="#profile">👤 Profile</a></li>
+                <li class="active"><a href="client.html">📚 Explore Societies</a></li>
+                <li><a href="my-societies.html">⭐ My Societies</a></li>
+                <li><a href="events.html">🗓️ Events</a></li>
+                <li><a href="profile.html">👤 Profile</a></li>
             </ul>
         </nav>
 
@@ -54,25 +53,25 @@
                 </div>
             </section>
             
-            <hr>
+            <div class="separator-line"></div>
 
             <section id="explore" class="dashboard-section">
                 <h2>📚 Explore Societies</h2>
                 <div class="card-grid">
                     <div class="card">
                         <h3>Coding Club</h3>
-                        <p>Learn to code and build projects.</p>
-                        <button class="join-btn">Join</button>
+                        <p>Learn to code and build projects in a supportive environment.</p>
+                        <button class="join-btn">Join Now</button>
                     </div>
                     <div class="card">
                         <h3>Photography Society</h3>
-                        <p>Capture the moments on and off campus.</p>
-                        <button class="join-btn">Join</button>
+                        <p>Capture the moments on and off campus. All skill levels welcome!</p>
+                        <button class="join-btn">Join Now</button>
                     </div>
                     <div class="card">
                         <h3>Debate Team</h3>
-                        <p>Sharpen your arguments and public speaking.</p>
-                        <button class="join-btn">Join</button>
+                        <p>Sharpen your arguments and public speaking skills for competition.</p>
+                        <button class="join-btn">Join Now</button>
                     </div>
                 </div>
             </section>
@@ -89,11 +88,11 @@
                 <h2>🗓️ Upcoming Events</h2>
                 <div class="event-card">
                     <h4>Annual Gala Dinner</h4>
-                    <p>Societies Council | Fri, Dec 15th, 7:00 PM</p>
+                    <p>Societies Council | Fri, Dec 15th, 7:00 PM | **Book Tickets**</p>
                 </div>
                 <div class="event-card">
                     <h4>Beginner's Yoga Session</h4>
-                    <p>Wellness Society | Sun, Nov 26th, 10:00 AM</p>
+                    <p>Wellness Society | Sun, Nov 26th, 10:00 AM | **Register**</p>
                 </div>
             </section>
 
@@ -103,10 +102,14 @@
                     <p><strong>Name:</strong> Jane Doe</p>
                     <p><strong>Student ID:</strong> S1234567</p>
                     <p><strong>Email:</strong> jane.doe@leicester.ac.uk</p>
-                    <button>Edit Profile</button>
+                    <button class="edit-btn">Edit Profile</button>
                 </div>
             </section>
         </main>
+        
+        <footer class="footer">
+            <p>&copy; 2024 University of Leicester Student Hub</p>
+        </footer>
     </div>
 </body>
 </html>

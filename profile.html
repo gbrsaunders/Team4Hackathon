@@ -1,1 +1,83 @@
-YOOASKNKASAKSL
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | University of Leicester Student Hub</title>
+    <link rel="stylesheet" href="styles.css"> 
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="header">
+            <div class="logo">
+                <h3>Student Hub 🎓</h3>
+            </div>
+            <div class="user-actions">
+                <span>Welcome, Student!</span>
+            </div>
+        </header>
+
+        <nav class="top-taskbar">
+            <ul>
+                <li><a href="client.html">📚 Explore Societies</a></li>
+                <li><a href="my-societies.html">⭐ My Societies</a></li>
+                <li><a href="events.html">🗓️ Events</a></li>
+                <li class="active"><a href="profile.html">👤 Profile</a></li> 
+            </ul>
+        </nav>
+
+        <main class="main-content">
+
+            <section id="profile" class="dashboard-section">
+                <h2>👤 Profile Settings & Information</h2>
+                
+                <form class="profile-form">
+                    
+                    <div class="profile-field">
+                        <label for="studentId">Student ID:</label>
+                        <input type="text" id="studentId" value="S1234567" readonly>
+                    </div>
+
+                    <div class="profile-field">
+                        <label for="firstName">First Name:</label>
+                        <input type="text" id="firstName" value="Jane">
+                    </div>
+
+                    <div class="profile-field">
+                        <label for="lastName">Last Name:</label>
+                        <input type="text" id="lastName" value="Doe">
+                    </div>
+
+                    <div class="profile-field">
+                        <label for="email">Email Address:</label>
+                        <input type="email" id="email" value="jane.doe@leicester.ac.uk" readonly>
+                    </div>
+
+                    <div class="profile-field">
+                        <label for="dob">Date of Birth:</label>
+                        <input type="date" id="dob" value="2000-01-01">
+                    </div>
+
+                    <div class="profile-field">
+                        <label for="department">Department/Course:</label>
+                        <select id="department">
+                            <option value="ComputerScience" selected>Computer Science</option>
+                            <option value="Law">Law</option>
+                            <option value="History">History</option>
+                            <option value="Medicine">Medicine</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="edit-btn">Save Changes</button>
+                    <button type="button" class="join-btn" style="background-color: var(--uol-grey);">Change Password</button>
+
+                </form>
+            </section>
+        </main>
+        
+        <footer class="footer">
+            <p>&copy; 2024 University of Leicester Student Hub</p>
+        </footer>
+    </div>
+</body>
+</html>
