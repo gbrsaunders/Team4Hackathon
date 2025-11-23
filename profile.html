@@ -3,8 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile | University of Leicester Student Hub</title>
+    <title>Profile Settings | University of Leicester Student Hub</title>
     <link rel="stylesheet" href="styles.css"> 
+    <style>
+        .edit-field {
+            display: none; /* Hidden by default */
+            margin-bottom: 12px;
+        }
+        .display-info {
+            margin-bottom: 12px;
+        }
+        .edit-field input {
+            padding: 8px;
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -28,56 +44,112 @@
 
         <main class="main-content">
 
+            <div class="search-container">
+                <input type="text" placeholder="Search for settings or help..." class="society-search-input">
+                <button type="submit" class="search-btn">🔍 Search</button>
+            </div>
+            <div class="separator-line"></div>
+
             <section id="profile" class="dashboard-section">
-                <h2>👤 Profile Settings & Information</h2>
-                
-                <form class="profile-form">
+                <h2>👤 Profile Settings</h2>
+                <div class="profile-info">
                     
-                    <div class="profile-field">
-                        <label for="studentId">Student ID:</label>
-                        <input type="text" id="studentId" value="S1234567" readonly>
+                    <div id="displayMode">
+                        <p class="display-info"><strong>Name:</strong> <span id="displayName">Jane Doe</span></p>
+                        <p class="display-info"><strong>Student ID:</strong> <span id="displayStudentID">S1234567</span></p>
+                        <p class="display-info"><strong>Email:</strong> <span id="displayEmail">jane.doe@leicester.ac.uk</span></p>
+                        <p class="display-info"><strong>Course:</strong> <span id="displayCourse">Computer Science</span></p>
+                        <p class="display-info"><strong>Year:</strong> <span id="displayYear">2nd Year</span></p>
                     </div>
 
-                    <div class="profile-field">
-                        <label for="firstName">First Name:</label>
-                        <input type="text" id="firstName" value="Jane">
+                    <div id="editMode" style="display: none;">
+                        <div class="edit-field">
+                            <strong>Name:</strong> 
+                            <input type="text" id="inputName" value="Jane Doe">
+                        </div>
+                        <div class="edit-field">
+                            <strong>Student ID:</strong> 
+                            <input type="text" id="inputStudentID" value="S1234567" disabled> 
+                        </div>
+                        <div class="edit-field">
+                            <strong>Email:</strong> 
+                            <input type="email" id="inputEmail" value="jane.doe@leicester.ac.uk">
+                        </div>
+                        <div class="edit-field">
+                            <strong>Course:</strong> 
+                            <input type="text" id="inputCourse" value="Computer Science">
+                        </div>
+                        <div class="edit-field">
+                            <strong>Year:</strong> 
+                            <input type="text" id="inputYear" value="2nd Year">
+                        </div>
                     </div>
-
-                    <div class="profile-field">
-                        <label for="lastName">Last Name:</label>
-                        <input type="text" id="lastName" value="Doe">
-                    </div>
-
-                    <div class="profile-field">
-                        <label for="email">Email Address:</label>
-                        <input type="email" id="email" value="jane.doe@leicester.ac.uk" readonly>
-                    </div>
-
-                    <div class="profile-field">
-                        <label for="dob">Date of Birth:</label>
-                        <input type="date" id="dob" value="2000-01-01">
-                    </div>
-
-                    <div class="profile-field">
-                        <label for="department">Department/Course:</label>
-                        <select id="department">
-                            <option value="ComputerScience" selected>Computer Science</option>
-                            <option value="Law">Law</option>
-                            <option value="History">History</option>
-                            <option value="Medicine">Medicine</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="edit-btn">Save Changes</button>
-                    <button type="button" class="join-btn" style="background-color: var(--uol-grey);">Change Password</button>
-
-                </form>
+                    
+                    <button class="edit-btn" id="editToggleButton" onclick="toggleEditMode()">Edit Profile</button>
+                    <button class="edit-btn" style="display: none;" id="saveButton" onclick="saveChanges()">Save Changes</button>
+                    <button class="edit-btn">Change Password</button>
+                </div>
             </section>
+
         </main>
         
         <footer class="footer">
             <p>&copy; 2024 University of Leicester Student Hub</p>
         </footer>
     </div>
+
+    <script>
+        function toggleEditMode() {
+            const displayMode = document.getElementById('displayMode');
+            const editMode = document.getElementById('editMode');
+            const editButton = document.getElementById('editToggleButton');
+            const saveButton = document.getElementById('saveButton');
+
+            if (editButton.textContent === 'Edit Profile') {
+                // Switch to Edit Mode
+                displayMode.style.display = 'none';
+                editMode.style.display = 'block';
+                editButton.textContent = 'Cancel Edit';
+                saveButton.style.display = 'inline-block';
+                
+                // Show all input fields
+                document.querySelectorAll('.edit-field').forEach(field => {
+                    field.style.display = 'block';
+                });
+
+            } else {
+                // Switch back to Display Mode
+                displayMode.style.display = 'block';
+                editMode.style.display = 'none';
+                editButton.textContent = 'Edit Profile';
+                saveButton.style.display = 'none';
+                // Reset inputs to current display values (simulating a cancel)
+                document.getElementById('inputName').value = document.getElementById('displayName').textContent;
+                document.getElementById('inputEmail').value = document.getElementById('displayEmail').textContent;
+                document.getElementById('inputCourse').value = document.getElementById('displayCourse').textContent;
+                document.getElementById('inputYear').value = document.getElementById('displayYear').textContent;
+            }
+        }
+
+        function saveChanges() {
+            // 1. Get new values from input fields
+            const newName = document.getElementById('inputName').value;
+            const newEmail = document.getElementById('inputEmail').value;
+            const newCourse = document.getElementById('inputCourse').value;
+            const newYear = document.getElementById('inputYear').value;
+
+            // 2. Update the display mode spans
+            document.getElementById('displayName').textContent = newName;
+            document.getElementById('displayEmail').textContent = newEmail;
+            document.getElementById('displayCourse').textContent = newCourse;
+            document.getElementById('displayYear').textContent = newYear;
+
+            // 3. Switch back to display mode
+            toggleEditMode();
+            
+            // In a real application, an AJAX call to a server would be made here
+            alert('Profile updated successfully! (Data saved temporarily in the browser)'); 
+        }
+    </script>
 </body>
 </html>
