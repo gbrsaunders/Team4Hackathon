@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   
+
+  <meta charset="UTF-8" />
+  <title>Societies Admin – Announcements</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <header class="topbar">
+  <div class="topbar-brand">Societies Admin</div>
+
+  <img src="lei-logo.png" alt="University of Leicester" class="topbar-logo" />
+
+  <nav class="topbar-nav">
+    <a class="topbar-link" href="societies.html">Societies</a>
+    <a class="topbar-link" href="members.html">Members</a>
+    <a class="topbar-link" href="events.html">Events</a>
+    <a class="topbar-link" href="announcements.html">Announcements</a>
+  </nav>
+</header>
+
+
+  <main class="main">
+    <h2 class="page-title" id="ann-page-title">Announcements</h2>
+    <p class="page-subtitle">
+      Post and review announcements for each society.
+    </p>
+
+    <div class="panel">
+      <form id="announcement-form">
+        <label>
+          Society
+          <select id="announcement-society"></select>
+        </label>
+
+        <label>
+          Title
+          <input type="text" id="announcement-title" required />
+        </label>
+
+        <label>
+          Message
+          <textarea id="announcement-message" rows="4" required></textarea>
+        </label>
+
+        <label>
+          Visible Until
+          <input type="date" id="announcement-until" />
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Post Announcement</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h3>Recent Announcements</h3>
+      <ul class="announcement-list" id="announcement-list"></ul>
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script>
+    let societyData = loadSocietyData();
+    let announcements = {};
+    let currentSociety = null;
+
+    const societySelect = document.getElementById("announcement-society");
+    const annForm = document.getElementById("announcement-form");
+    const annList = document.getElementById("announcement-list");
+    const pageTitle = document.getElementById("ann-page-title");
+
+    function loadAnnouncements() {
+      try {
+        const raw = localStorage.getItem("announcementData");
+        if (!raw) {
+          announcements = {};
+          return;
+        }
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+          announcements = parsed;
+        } else {
+          announcements = {};
+        }
+      } catch {
+        announcements = {};
+      }
+    }
+
+    function saveAnnouncements() {
+      try {
+        localStorage.setItem("announcementData", JSON.stringify(announcements));
+      } catch {}
+    }
+
+    function getSocietyFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("society");
+    }
+
+    function setSocietyInUrl(name) {
+      const params = new URLSearchParams(window.location.search);
+      params.set("society", name);
+      const newUrl = window.location.pathname + "?" + params.toString();
+      window.history.replaceState({}, "", newUrl);
+    }
+
+    function populateSocietySelect() {
+      societySelect.innerHTML = "";
+      Object.keys(societyData).forEach((name) => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        societySelect.appendChild(opt);
+      });
+    }
+
+    function renderAnnouncements() {
+      if (!currentSociety) return;
+      const items = announcements[currentSociety] || [];
+      annList.innerHTML = "";
+
+      if (!items.length) {
+        const li = document.createElement("li");
+        li.innerHTML = `<p>No announcements yet for this society.</p>`;
+        annList.appendChild(li);
+        return;
+      }
+
+      items
+        .slice()
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .forEach((a) => {
+          const li = document.createElement("li");
+          const postedText = new Date(a.createdAt).toLocaleString();
+          const untilText = a.visibleUntil
+            ? `Visible until: ${a.visibleUntil}`
+            : "";
+          li.innerHTML = `
+            <div class="announcement-header">
+              <span class="announcement-society">${currentSociety}</span>
+              <span class="announcement-date">Posted: ${postedText}</span>
+            </div>
+            <h4>${a.title}</h4>
+            <p>${a.message}</p>
+            ${
+              untilText
+                ? `<p style="font-size:12px;color:#777;margin-top:4px;">${untilText}</p>`
+                : ""
+            }
+          `;
+          annList.appendChild(li);
+        });
+    }
+
+    function initAnnouncementsPage() {
+      loadAnnouncements();
+      societyData = loadSocietyData();
+      const names = Object.keys(societyData);
+      if (!names.length) return;
+
+      populateSocietySelect();
+
+      const fromUrl = getSocietyFromUrl();
+      if (fromUrl && societyData[fromUrl]) {
+        currentSociety = fromUrl;
+      } else {
+        currentSociety = names[0];
+      }
+
+      societySelect.value = currentSociety;
+      pageTitle.textContent = `Announcements – ${currentSociety}`;
+      renderAnnouncements();
+    }
+
+    societySelect.addEventListener("change", () => {
+      const value = societySelect.value;
+      if (!value) return;
+      currentSociety = value;
+      pageTitle.textContent = `Announcements – ${currentSociety}`;
+      setSocietyInUrl(value);
+      renderAnnouncements();
+    });
+
+    annForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!currentSociety) return;
+
+      const title = document.getElementById("announcement-title").value.trim();
+      const message = document
+        .getElementById("announcement-message")
+        .value.trim();
+      const until = document.getElementById("announcement-until").value;
+
+      if (!title || !message) return;
+
+      if (!announcements[currentSociety]) {
+        announcements[currentSociety] = [];
+      }
+
+      announcements[currentSociety].push({
+        title,
+        message,
+        visibleUntil: until || null,
+        createdAt: Date.now()
+      });
+
+      saveAnnouncements();
+      annForm.reset();
+      renderAnnouncements();
+    });
+
+    initAnnouncementsPage();
+  </script>
+</body>
+</html>
