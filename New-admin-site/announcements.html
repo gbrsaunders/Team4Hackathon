@@ -1,27 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   
-
   <meta charset="UTF-8" />
+
   <title>Societies Admin – Announcements</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
   <header class="topbar">
-  <div class="topbar-brand">Societies Admin</div>
+    <div class="topbar-brand">Societies Admin</div>
 
-  <img src="lei-logo.png" alt="University of Leicester" class="topbar-logo" />
+    <img src="lei-logo.png" alt="University of Leicester" class="topbar-logo" />
 
-  <nav class="topbar-nav">
-    <a class="topbar-link" href="societies.html">Societies</a>
-    <a class="topbar-link" href="members.html">Members</a>
-    <a class="topbar-link" href="events.html">Events</a>
-    <a class="topbar-link" href="announcements.html">Announcements</a>
-  </nav>
-</header>
-
+    <nav class="topbar-nav">
+      <a class="topbar-link" href="societies.html">Societies</a>
+      <a class="topbar-link" href="members.html">Members</a>
+      <a class="topbar-link" href="schedule.html">Schedule</a>
+      <a class="topbar-link active" href="announcements.html">Announcements</a>
+    </nav>
+  </header>
 
   <main class="main">
     <h2 class="page-title" id="ann-page-title">Announcements</h2>
@@ -66,37 +64,12 @@
   <script src="data.js"></script>
   <script>
     let societyData = loadSocietyData();
-    let announcements = {};
     let currentSociety = null;
 
     const societySelect = document.getElementById("announcement-society");
     const annForm = document.getElementById("announcement-form");
     const annList = document.getElementById("announcement-list");
     const pageTitle = document.getElementById("ann-page-title");
-
-    function loadAnnouncements() {
-      try {
-        const raw = localStorage.getItem("announcementData");
-        if (!raw) {
-          announcements = {};
-          return;
-        }
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === "object") {
-          announcements = parsed;
-        } else {
-          announcements = {};
-        }
-      } catch {
-        announcements = {};
-      }
-    }
-
-    function saveAnnouncements() {
-      try {
-        localStorage.setItem("announcementData", JSON.stringify(announcements));
-      } catch {}
-    }
 
     function getSocietyFromUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -108,6 +81,11 @@
       params.set("society", name);
       const newUrl = window.location.pathname + "?" + params.toString();
       window.history.replaceState({}, "", newUrl);
+    }
+
+    function ensureAnnouncementsArray(name) {
+      const info = societyData[name];
+      if (!info.announcements) info.announcements = [];
     }
 
     function populateSocietySelect() {
@@ -122,7 +100,11 @@
 
     function renderAnnouncements() {
       if (!currentSociety) return;
-      const items = announcements[currentSociety] || [];
+
+      societyData = loadSocietyData();
+      ensureAnnouncementsArray(currentSociety);
+      const items = societyData[currentSociety].announcements || [];
+
       annList.innerHTML = "";
 
       if (!items.length) {
@@ -135,7 +117,7 @@
       items
         .slice()
         .sort((a, b) => b.createdAt - a.createdAt)
-        .forEach((a) => {
+        .forEach((a, index) => {
           const li = document.createElement("li");
           const postedText = new Date(a.createdAt).toLocaleString();
           const untilText = a.visibleUntil
@@ -159,7 +141,6 @@
     }
 
     function initAnnouncementsPage() {
-      loadAnnouncements();
       societyData = loadSocietyData();
       const names = Object.keys(societyData);
       if (!names.length) return;
@@ -173,6 +154,8 @@
         currentSociety = names[0];
       }
 
+      ensureAnnouncementsArray(currentSociety);
+
       societySelect.value = currentSociety;
       pageTitle.textContent = `Announcements – ${currentSociety}`;
       renderAnnouncements();
@@ -182,6 +165,7 @@
       const value = societySelect.value;
       if (!value) return;
       currentSociety = value;
+      ensureAnnouncementsArray(currentSociety);
       pageTitle.textContent = `Announcements – ${currentSociety}`;
       setSocietyInUrl(value);
       renderAnnouncements();
@@ -199,18 +183,18 @@
 
       if (!title || !message) return;
 
-      if (!announcements[currentSociety]) {
-        announcements[currentSociety] = [];
-      }
+      societyData = loadSocietyData();
+      ensureAnnouncementsArray(currentSociety);
 
-      announcements[currentSociety].push({
+      const soc = societyData[currentSociety];
+      soc.announcements.push({
         title,
         message,
         visibleUntil: until || null,
         createdAt: Date.now()
       });
 
-      saveAnnouncements();
+      saveSocietyData(societyData);
       annForm.reset();
       renderAnnouncements();
     });

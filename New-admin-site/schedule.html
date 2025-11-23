@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Societies Admin – Schedule</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-brand">Societies Admin</div>
+
+    <img src="lei-logo.png" alt="University of Leicester" class="topbar-logo" />
+
+    <nav class="topbar-nav">
+      <a class="topbar-link" href="societies.html">Societies</a>
+      <a class="topbar-link" href="members.html">Members</a>
+      <a class="topbar-link active" href="schedule.html">Schedule</a>
+      <a class="topbar-link" href="announcements.html">Announcements</a>
+    </nav>
+  </header>
+
+  <main class="main">
+    <h2 class="page-title" id="events-page-title">Schedule</h2>
+    <p class="page-subtitle" id="events-page-subtitle">
+      Weekly timetable for society practices and training sessions.
+    </p>
+
+    <!-- MAIN PANEL: TWO COLUMNS (LEFT = ADD FORM, RIGHT = TIMETABLE) -->
+    <div class="panel timetable-two-col">
+
+      <!-- LEFT COLUMN: QUICK ADD FORM -->
+      <div class="timetable-left">
+        <h3 style="font-size: 16px; margin-bottom: 8px;">Add to this week</h3>
+
+        <form id="quick-add-form" class="timetable-add-form">
+          <label>
+            Title
+            <input type="text" id="quick-title" placeholder="Training session" required />
+          </label>
+
+          <label>
+            Day
+            <select id="quick-day" required>
+              <option value="">Select day</option>
+              <option value="0">Mon</option>
+              <option value="1">Tue</option>
+              <option value="2">Wed</option>
+              <option value="3">Thu</option>
+              <option value="4">Fri</option>
+              <option value="5">Sat</option>
+              <option value="6">Sun</option>
+            </select>
+          </label>
+
+          <label>
+            Time
+            <input type="time" id="quick-time" required />
+          </label>
+
+          <label>
+            Location
+            <input type="text" id="quick-location" placeholder="Sports Hall" />
+          </label>
+
+          <button type="submit" class="btn btn-primary btn-small">Add</button>
+        </form>
+      </div>
+
+      <!-- RIGHT COLUMN: CONTROLS + TIMETABLE -->
+      <div class="timetable-right">
+        <div class="panel-header-inline" style="margin-bottom: 10px;">
+          <label>
+            Select Society
+            <select id="events-society-select"></select>
+          </label>
+
+          <label>
+            Week starting
+            <input type="date" id="week-start-input" />
+          </label>
+        </div>
+
+        <p style="font-size: 13px; color: #555; margin-bottom: 8px;">
+          Click on a slot to add/edit events, or click the × on an event to delete it.
+        </p>
+
+        <div id="timetable-grid" class="timetable-grid"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script>
+    let societyData = loadSocietyData();
+    let currentSociety = null;
+
+    const selectEl = document.getElementById("events-society-select");
+    const titleEl = document.getElementById("events-page-title");
+    const subtitleEl = document.getElementById("events-page-subtitle");
+    const weekStartInput = document.getElementById("week-start-input");
+    const timetableGrid = document.getElementById("timetable-grid");
+
+    // Quick-add controls
+    const quickForm = document.getElementById("quick-add-form");
+    const quickTitle = document.getElementById("quick-title");
+    const quickDay = document.getElementById("quick-day");
+    const quickTime = document.getElementById("quick-time");
+    const quickLocation = document.getElementById("quick-location");
+
+    const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const TIME_SLOTS = [
+      "08:00", "09:00", "10:00", "11:00", "12:00",
+      "13:00", "14:00", "15:00", "16:00", "17:00",
+      "18:00", "19:00", "20:00", "21:00"
+    ];
+
+    function getSocietyFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("society");
+    }
+
+    function setSocietyInUrl(name) {
+      const params = new URLSearchParams(window.location.search);
+      params.set("society", name);
+      const newUrl = window.location.pathname + "?" + params.toString();
+      window.history.replaceState({}, "", newUrl);
+    }
+
+    function ensureEventsArray(name) {
+      const info = societyData[name];
+      if (!info.events) info.events = [];
+    }
+
+    function populateSocietySelect() {
+      selectEl.innerHTML = "";
+      Object.keys(societyData).forEach((name) => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        selectEl.appendChild(opt);
+      });
+    }
+
+    function getMonday(date) {
+      const d = new Date(date);
+      const day = d.getDay(); // 0 (Sun) - 6 (Sat)
+      const diff = (day === 0 ? -6 : 1) - day; // shift to Monday
+      d.setDate(d.getDate() + diff);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    function getWeekStartFromInput() {
+      let weekStart;
+      if (weekStartInput.value) {
+        weekStart = new Date(weekStartInput.value);
+      } else {
+        weekStart = getMonday(new Date());
+        weekStartInput.valueAsDate = weekStart;
+      }
+      return getMonday(weekStart);
+    }
+
+    function formatDateLabel(d) {
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      return day + "/" + month;
+    }
+
+    function renderTimetable(events) {
+      const weekStart = getWeekStartFromInput();
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      const eventMap = {};
+      events.forEach((ev) => {
+        if (!ev.date || !ev.time) return;
+        const d = new Date(ev.date);
+        d.setHours(0, 0, 0, 0);
+        if (d < weekStart || d > weekEnd) return;
+        const key = ev.date + "_" + ev.time;
+        eventMap[key] = ev;
+      });
+
+      let html = '<table class="timetable"><thead><tr><th>Time</th>';
+      const weekDates = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(weekStart);
+        d.setDate(d.getDate() + i);
+        weekDates.push(d);
+        html += `<th>${DAYS[i]}<br><span class="timetable-date">${formatDateLabel(d)}</span></th>`;
+      }
+      html += "</tr></thead><tbody>";
+
+      TIME_SLOTS.forEach((slot) => {
+        html += `<tr><td class="timetable-time">${slot}</td>`;
+        weekDates.forEach((d) => {
+          const dateStr = d.toISOString().slice(0, 10);
+          const key = dateStr + "_" + slot;
+          const ev = eventMap[key];
+          if (ev) {
+            const location = ev.location ? `<br><small>${ev.location}</small>` : "";
+            html += `
+              <td class="timetable-cell"
+                  data-date="${dateStr}"
+                  data-time="${slot}">
+                <div class="timetable-event" data-date="${dateStr}" data-time="${slot}">
+                  <div class="timetable-event-main">
+                    ${ev.title}${location}
+                  </div>
+                  <button type="button"
+                          class="timetable-event-delete"
+                          data-date="${dateStr}"
+                          data-time="${slot}">×</button>
+                </div>
+              </td>`;
+          } else {
+            html += `
+              <td class="timetable-cell timetable-empty"
+                  data-date="${dateStr}"
+                  data-time="${slot}">
+              </td>`;
+          }
+        });
+        html += "</tr>";
+      });
+
+      html += "</tbody></table>";
+      timetableGrid.innerHTML = html;
+    }
+
+    function renderSchedule() {
+      societyData = loadSocietyData();
+      if (!currentSociety || !societyData[currentSociety]) return;
+
+      ensureEventsArray(currentSociety);
+      const info = societyData[currentSociety];
+      const events = info.events || [];
+
+      titleEl.textContent = `Schedule – ${currentSociety}`;
+      subtitleEl.textContent =
+        info.description || "Weekly timetable for this society.";
+
+      renderTimetable(events);
+    }
+
+    function initSchedulePage() {
+      societyData = loadSocietyData();
+      const names = Object.keys(societyData);
+      if (!names.length) return;
+
+      populateSocietySelect();
+
+      const fromUrl = getSocietyFromUrl();
+      if (fromUrl && societyData[fromUrl]) {
+        currentSociety = fromUrl;
+      } else {
+        currentSociety = names[0];
+      }
+
+      ensureEventsArray(currentSociety);
+      selectEl.value = currentSociety;
+
+      const monday = getMonday(new Date());
+      weekStartInput.valueAsDate = monday;
+
+      renderSchedule();
+    }
+
+    function deleteEvent(date, time) {
+      if (!currentSociety) return;
+      societyData = loadSocietyData();
+      if (!societyData[currentSociety]) return;
+      ensureEventsArray(currentSociety);
+      const info = societyData[currentSociety];
+
+      const index = info.events.findIndex(ev => ev.date === date && ev.time === time);
+      if (index === -1) return;
+
+      if (!confirm("Delete this event?")) return;
+
+      info.events.splice(index, 1);
+      saveSocietyData(societyData);
+      renderSchedule();
+    }
+
+    function handleCellClick(e) {
+      const cell = e.target.closest("td[data-date]");
+      if (!cell || !currentSociety) return;
+
+      const date = cell.dataset.date;
+      const time = cell.dataset.time;
+      societyData = loadSocietyData();
+      ensureEventsArray(currentSociety);
+      const info = societyData[currentSociety];
+      const events = info.events;
+
+      const index = events.findIndex(ev => ev.date === date && ev.time === time);
+
+      if (index >= 0) {
+        const ev = events[index];
+        const action = prompt(
+          `Event: ${ev.title}\nLocation: ${ev.location || "Not set"}\n\n` +
+          'Type "edit" to change it, "delete" to remove it, or Cancel to do nothing.',
+          "edit"
+        );
+        if (!action) return;
+        const choice = action.toLowerCase();
+
+        if (choice.startsWith("d")) {
+          deleteEvent(date, time);
+        } else if (choice.startsWith("e")) {
+          const newTitle = prompt("Event title:", ev.title);
+          if (!newTitle || !newTitle.trim()) {
+            alert("Title is required.");
+            return;
+          }
+          const newLocation = prompt("Location (optional):", ev.location || "");
+          events[index] = {
+            ...ev,
+            title: newTitle.trim(),
+            location: (newLocation || "").trim()
+          };
+          saveSocietyData(societyData);
+          renderSchedule();
+        }
+      } else {
+        const title = prompt("Event title:");
+        if (!title || !title.trim()) return;
+        const location = prompt("Location (optional):", "");
+
+        events.push({
+          title: title.trim(),
+          date,
+          time,
+          location: (location || "").trim(),
+          description: ""
+        });
+
+        saveSocietyData(societyData);
+        renderSchedule();
+      }
+    }
+
+    // Quick add form handler
+    quickForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!currentSociety) return;
+
+      const title = quickTitle.value.trim();
+      const dayIndex = parseInt(quickDay.value, 10);
+      const time = quickTime.value;
+      const location = quickLocation.value.trim();
+
+      if (!title || isNaN(dayIndex) || !time) {
+        alert("Please fill in title, day and time.");
+        return;
+      }
+
+      societyData = loadSocietyData();
+      ensureEventsArray(currentSociety);
+      const info = societyData[currentSociety];
+
+      const weekStart = getWeekStartFromInput();
+      const d = new Date(weekStart);
+      d.setDate(d.getDate() + dayIndex);
+      const dateStr = d.toISOString().slice(0, 10);
+
+      info.events.push({
+        title,
+        date: dateStr,
+        time,
+        location,
+        description: ""
+      });
+
+      saveSocietyData(societyData);
+      quickForm.reset();
+      renderSchedule();
+    });
+
+    selectEl.addEventListener("change", () => {
+      const value = selectEl.value;
+      if (!value) return;
+      currentSociety = value;
+      ensureEventsArray(currentSociety);
+      setSocietyInUrl(value);
+      renderSchedule();
+    });
+
+    weekStartInput.addEventListener("change", () => {
+      renderSchedule();
+    });
+
+    // One click handler for timetable: delete button OR cell click
+    timetableGrid.addEventListener("click", (e) => {
+      if (e.target.classList.contains("timetable-event-delete")) {
+        const date = e.target.dataset.date;
+        const time = e.target.dataset.time;
+        deleteEvent(date, time);
+        e.stopPropagation();
+        return;
+      }
+      handleCellClick(e);
+    });
+
+    initSchedulePage();
+  </script>
+</body>
+</html>
+
