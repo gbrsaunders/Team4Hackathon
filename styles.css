@@ -2,7 +2,7 @@
 :root {
     /* University of Leicester Core Colours */
     --uol-red: #E4042C;       /* Core Red (The main brand colour) */
-    --uol-grey: #3C3C3C;      /* Core Grey (Used for text/accents) */
+    --uol-grey: #3C3C3C;       /* Core Grey (Used for text/accents) */
     --uol-dark-grey: #2a2a2a; /* Darker grey for better contrast and professionalism */
     
     --text-color: var(--uol-grey);
@@ -52,6 +52,7 @@ a {
     background-color: var(--uol-red); /* CHANGED: Header background is now Red */
     color: var(--card-bg); /* White text in the red header */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+    position: relative; /* Added for logo absolute positioning */
 }
 
 .logo h3 {
@@ -62,6 +63,20 @@ a {
 }
 .logo h3 strong {
     color: var(--uol-dark-grey); /* CHANGED: Highlight 'Societies' in dark grey for contrast */
+}
+
+/* UOL Logo Centering */
+.logo-image-container {
+    position: absolute;
+    left: 50%;
+    /* Use translate for full centering on both axes */
+    transform: translate(-50%, -50%); 
+    top: 50%; 
+}
+
+.uol-logo {
+    height: 60px; /* ADJUSTED SIZE TO 60PX */
+    display: block;
 }
 
 .user-actions {
@@ -366,6 +381,7 @@ a {
 .hidden-section {
     display: none;
 }
+
 /* --- My Societies Specific Styling --- */
 
 .society-grid {
@@ -377,19 +393,27 @@ a {
 
 .my-society-card {
     /* Overrides the default card styling for joined groups */
-    padding: 20px;
-    border-left: 5px solid var(--uol-red); /* Strong red accent */
+    /* Inherits from .card if structure allows, otherwise defines its own look */
+    border: 1px solid var(--border-color);
+    padding: 25px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    background-color: var(--card-bg);
+    
+    border-left: 5px solid var(--uol-red); /* Strong red accent: UOL RED */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
 .my-society-card h3 {
+    color: var(--uol-dark-grey); /* Heading color */
     margin-bottom: 5px;
 }
 
 .my-society-card p {
     margin-bottom: 8px;
+    color: #666;
 }
 
 .member-stats {
@@ -400,7 +424,7 @@ a {
 }
 
 .view-details-btn {
-    /* Style for the primary action button */
+    /* Style for the primary action button - UOL RED */
     background-color: var(--uol-red);
     color: white;
     border: none;
@@ -410,6 +434,7 @@ a {
     font-weight: 600;
     margin-bottom: 10px; /* Space between the two buttons */
     transition: background-color 0.2s;
+    width: 100%; /* Make button full width of the card */
 }
 
 .view-details-btn:hover {
@@ -417,7 +442,7 @@ a {
 }
 
 .leave-btn {
-    /* Style for the secondary action button (Leave) */
+    /* Style for the secondary action button (Leave) - UOL GREY */
     background-color: var(--uol-grey);
     color: white;
     border: none;
@@ -426,8 +451,42 @@ a {
     cursor: pointer;
     font-weight: 600;
     transition: background-color 0.2s;
+    width: 100%; /* Make button full width of the card */
 }
 
 .leave-btn:hover {
     background-color: var(--uol-dark-grey);
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 20px;
+    }
+    .logo-image-container {
+        position: static;
+        transform: none;
+        margin: 4px 0;
+    }
+    .top-taskbar ul {
+        flex-wrap: wrap;
+    }
+    .top-taskbar li a {
+        padding: 10px 15px;
+    }
+    .main-content {
+        padding: 0 10px;
+    }
+    .metrics-summary, .card-grid, .society-grid {
+        grid-template-columns: 1fr;
+    }
+    .metrics-summary {
+        flex-direction: column;
+    }
+    .search-container {
+        flex-direction: column;
+    }
 }
