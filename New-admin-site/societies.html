@@ -74,5 +74,182 @@
     </main>
 
     <script src="data.js"></script>
+     <script>
+    let societyData = loadSocietyData();
+    let editingName = null;
+
+    const totalSocietiesEl = document.getElementById("total-societies-count");
+    const totalMembersEl = document.getElementById("total-members-count");
+    const societyGrid = document.getElementById("society-grid");
+    const searchInput = document.getElementById("society-search");
+
+    const addBtn = document.getElementById("add-society-btn");
+    const formPanel = document.getElementById("add-society-panel");
+    const form = document.getElementById("society-form");
+    const cancelBtn = document.getElementById("society-cancel-btn");
+    const formTitle = document.getElementById("society-form-title");
+    const nameInput = document.getElementById("society-name-input");
+    const descInput = document.getElementById("society-description-input");
+
+    function updateStats() {
+      const names = Object.keys(societyData);
+      totalSocietiesEl.textContent = names.length;
+
+      let totalMembers = 0;
+      names.forEach(name => {
+        totalMembers += (societyData[name].members || []).length;
+      });
+
+      totalMembersEl.textContent = totalMembers;
+    }
+
+    function renderSocieties() {
+      societyGrid.innerHTML = "";
+      const search = searchInput.value.toLowerCase();
+
+      Object.entries(societyData).forEach(([name, info]) => {
+        if (search && !name.toLowerCase().includes(search)) return;
+
+        const memberCount = (info.members || []).length;
+
+        const card = document.createElement("article");
+        card.className = "society-card";
+        card.innerHTML = `
+          <div>
+            <h3>${name}</h3>
+            <p>${info.description || "No description provided."}</p>
+          </div>
+          <div class="society-meta">
+            <span>${memberCount} members</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-primary edit-society" data-name="${name}">Edit</button>
+            <button class="btn btn-outline view-members" data-name="${name}">View Members</button>
+            <button class="btn btn-outline view-schedule" data-name="${name}">View Schedule</button>
+            <button class="btn btn-danger delete-society" data-name="${name}">Delete</button>
+          </div>
+        `;
+        societyGrid.appendChild(card);
+      });
+
+      updateStats();
+    }
+
+    function openAddForm() {
+      editingName = null;
+      formTitle.textContent = "Add New Society";
+      form.reset();
+      nameInput.disabled = false;
+      formPanel.style.display = "block";
+    }
+
+    function openEditForm(name) {
+      const info = societyData[name];
+      if (!info) return;
+
+      editingName = name;
+      formTitle.textContent = "Edit Society";
+      nameInput.value = name;
+      nameInput.disabled = false;
+      descInput.value = info.description || "";
+
+      formPanel.style.display = "block";
+    }
+
+    function closeForm() {
+      formPanel.style.display = "none";
+      form.reset();
+      editingName = null;
+      formTitle.textContent = "Manage Societies";
+      nameInput.disabled = false;
+    }
+
+    addBtn.addEventListener("click", openAddForm);
+    cancelBtn.addEventListener("click", closeForm);
+
+    // CREATE / EDIT SOCIETY – keeps members, events & announcements together
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const newName = nameInput.value.trim();
+      const desc = descInput.value.trim();
+
+      if (!newName) return;
+
+      if (editingName === null) {
+        // Creating a new society
+        if (societyData[newName]) {
+          alert("A society with that name already exists.");
+          return;
+        }
+        societyData[newName] = {
+          description: desc,
+          status: "active",
+          members: [],
+          events: [],
+          announcements: []
+        };
+      } else {
+        // Editing / renaming an existing society
+        if (newName !== editingName && societyData[newName]) {
+          alert("A society with that name already exists.");
+          return;
+        }
+        const old = societyData[editingName];
+
+        const updated = {
+          description: desc,
+          status: old.status || "active",
+          members: old.members || [],
+          events: old.events || [],
+          announcements: old.announcements || []
+        };
+
+        if (newName !== editingName) {
+          delete societyData[editingName];
+        }
+        societyData[newName] = updated;
+      }
+
+      saveSocietyData(societyData);
+      closeForm();
+      renderSocieties();
+    });
+
+    // BUTTON HANDLERS
+    document.addEventListener("click", (e) => {
+      if (e.target.classList.contains("view-members")) {
+        const name = e.target.dataset.name;
+        window.location.href = `members.html?society=${encodeURIComponent(name)}`;
+      }
+
+      if (e.target.classList.contains("view-schedule")) {
+        const name = e.target.dataset.name;
+        window.location.href = `schedule.html?society=${encodeURIComponent(name)}`;
+      }
+
+      if (e.target.classList.contains("delete-society")) {
+        const name = e.target.dataset.name;
+        if (!confirm(`Delete the society "${name}" and all its data?`)) return;
+        delete societyData[name];
+        saveSocietyData(societyData);
+        renderSocieties();
+      }
+
+      if (e.target.classList.contains("edit-society")) {
+        openEditForm(e.target.dataset.name);
+      }
+    });
+
+    // FILTER
+    searchInput.addEventListener("input", renderSocieties);
+
+    function refreshAndRender() {
+      societyData = loadSocietyData();
+      renderSocieties();
+    }
+
+    refreshAndRender();
+    window.addEventListener("pageshow", refreshAndRender);
+  </script>
     </body>
 </html>
