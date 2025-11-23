@@ -50,7 +50,6 @@ a {
     align-items: center;
     padding: 18px 30px; 
     background-color: var(--uol-red); /* CHANGED: Header background is now Red */
-    border-bottom: 2px solid var(--uol-dark-grey); /* Subtle dark separation line */
     color: var(--card-bg); /* White text in the red header */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
 }
